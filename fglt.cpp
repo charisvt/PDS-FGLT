@@ -1,5 +1,6 @@
 #include <cilk/cilk_api.h>
 #include <cilk/cilk.h>
+#include <cuda_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "helper.hpp"
