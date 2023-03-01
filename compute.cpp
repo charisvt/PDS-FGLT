@@ -1,6 +1,7 @@
 #include "helper.hpp"
 #include <cilk/cilk.h>
 #include <cilk/cilk_api.h>
+#include <chrono>
 
 //void spmv(const mwIndex* row, const mwIndex* col, const mwIndex* x, mwIndex* y, const int n);
 
@@ -121,21 +122,24 @@ int compute
     return 1;
   }
 
+  // start measuring time
+  auto start = std::chrono::high_resolution_clock::now();
+  
   cilk_for(mwIndex i=0; i<n;i++) {
     int ip = 0;
     p2( &f[4][i], c3, i, col, row, &fl[ip*n], &pos[ip*n], &isNgbh[ip*n], &isUsed[ip*n] );
   }
 
+  // stop measuring time
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+  std::cout << "Time taken by p2: " << duration << " milliseconds" << std::endl;
 
-/*
-  // calculate f4
-  // calculate c3 
-  c3(row, col, n, f[4]);
-
-  cilk_for(size_t i = 0; i < A->v; i++) {
-    f->s2[i] -= 2 * f->s4[i];
-    f->s3[i] -= f->s4[i];
-  }*/
+  // recalculate f2 and f3
+  cilk_for(size_t i = 0; i < n; i++) {
+    f[2][i] -= 2 * f[4][i];
+    f[3][i] -= f[4][i];
+  }
   free(fl); 
   free(pos);
   free(isUsed);
